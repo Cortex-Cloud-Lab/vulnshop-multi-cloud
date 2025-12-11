@@ -189,14 +189,23 @@ resource "aws_iam_instance_profile" "ec2_profile" {
   role = aws_iam_role.ec2_role.name
 }
 
-# EC2 Instance
+# EC2 Instance - Updated
 resource "aws_instance" "main" {
-  ami                    = data.aws_ami.amazon_linux.id
-  instance_type          = var.instance_type
-  key_name               = aws_key_pair.main.key_name
-  vpc_security_group_ids = [aws_security_group.ec2.id]
-  subnet_id              = aws_subnet.public.id
-  iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
+  ami                     = data.aws_ami.amazon_linux.id
+  instance_type           = var.instance_type
+  key_name                = aws_key_pair.main.key_name
+  vpc_security_group_ids  = [aws_security_group.ec2.id]
+  subnet_id               = aws_subnet.public.id
+  iam_instance_profile    = aws_iam_instance_profile.ec2_profile.name
+
+  # --- ADDED SECTION START ---
+  # This forces the instance to use gp3 instead of the AMI's default gp2
+  root_block_device {
+    volume_type = "gp3"
+    volume_size = 32       # Optional: Set size (default for AL2 is 8GB)
+    encrypted   = false    # Highly recommended to keep enabled
+  }
+  # --- ADDED SECTION END ---
 
   user_data = templatefile("${path.module}/user-data.sh", {
     git_repo   = var.git_repo
