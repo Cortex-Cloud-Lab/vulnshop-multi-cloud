@@ -40,6 +40,18 @@ on:
         description: 'Existing APIM resource group (optional, defaults to new resource group)'
         required: false
         type: string
+      aws_access_key_id:
+        description: 'AWS Access Key ID (Optional override)'
+        required: false
+        type: string
+      aws_secret_access_key:
+        description: 'AWS Secret Access Key (Optional override)'
+        required: false
+        type: string 
+      aws_session_token:
+        description: 'AWS Session Token (Required for temporary creds)'
+        required: false
+        type: string
 
 env:
   TF_VAR_git_repo: ${{ github.server_url }}/${{ github.repository }}
@@ -87,8 +99,11 @@ jobs:
       if: inputs.cloud_provider == 'aws'
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        # Logic: Use the manual input if provided; otherwise, fall back to the GitHub Secret
+        aws-access-key-id: ${{ inputs.aws_access_key_id || secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ inputs.aws_secret_access_key || secrets.AWS_SECRET_ACCESS_KEY }}
+        # Pass the session token (if empty, the action ignores it)
+        aws-session-token: ${{ inputs.aws_session_token }}
         aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
 
     # Set provider-specific environment variables
