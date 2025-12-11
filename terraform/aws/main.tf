@@ -248,6 +248,13 @@ resource "aws_api_gateway_method" "proxy" {
   resource_id   = aws_api_gateway_resource.proxy.id
   http_method   = "ANY"
   authorization = "NONE"
+
+  # --- NEW BLOCK ---
+  # This tells API Gateway "I expect a path parameter called 'proxy'"
+  request_parameters = {
+    "method.request.path.proxy" = true
+  }
+  # ----------------------
 }
 
 # API Gateway Method for root
